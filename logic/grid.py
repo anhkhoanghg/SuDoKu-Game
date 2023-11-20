@@ -1,4 +1,4 @@
-from logic.cell import Cell
+from logic.Cell import Cell
 
 import math
 
