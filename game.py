@@ -6,7 +6,7 @@ from board import Board
 
 class Game(Board):
     screen = pygame.display.set_mode((800, 800))
-    pygame.display.set_caption("Victor Samsonov Sudoku")
+    pygame.display.set_caption("9x9 Sudoku")
     # Allows to deselect the boxes
     prev_val = None
 
@@ -332,7 +332,7 @@ class Game(Board):
 
     # Manages different states
     def state_handler(self):
-        pygame.display.set_caption("Victor Samsonov Sudoku")
+        pygame.display.set_caption("9x9 Sudoku")
         self.key = None
         self.strikes = 0
         # General Loop
