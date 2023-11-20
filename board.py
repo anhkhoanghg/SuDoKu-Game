@@ -1,44 +1,64 @@
 import pygame
-from sudoku import complete_sudoku, is_valid, generate_random_sudoku, show_sudoku, is_empty
+from sudoku import (
+    complete_sudoku,
+    is_valid,
+    generate_random_sudoku,
+    show_sudoku,
+    is_empty,
+)
 from square import Square
 
 import time
 
-tm = 200
-lm = 230
+tm = 100
+lm = 150
 prev_val = None
 
 
 class Board(Square):
+    m2 = [
+        [8, 1, 0, 0, 3, 0, 0, 2, 7],
+        [0, 6, 2, 0, 5, 0, 0, 9, 0],
+        [0, 7, 0, 0, 0, 0, 0, 0, 0],
+        [0, 9, 0, 6, 0, 0, 1, 0, 0],
+        [1, 0, 0, 0, 2, 0, 0, 0, 4],
+        [0, 0, 8, 0, 0, 5, 0, 7, 0],
+        [0, 0, 0, 0, 0, 0, 0, 8, 0],
+        [0, 2, 0, 0, 1, 0, 7, 5, 0],
+        [3, 8, 0, 0, 7, 0, 0, 4, 2],
+    ]
 
-    m2 = [[8, 1, 0, 0, 3, 0, 0, 2, 7],
-          [0, 6, 2, 0, 5, 0, 0, 9, 0],
-          [0, 7, 0, 0, 0, 0, 0, 0, 0],
-          [0, 9, 0, 6, 0, 0, 1, 0, 0],
-          [1, 0, 0, 0, 2, 0, 0, 0, 4],
-          [0, 0, 8, 0, 0, 5, 0, 7, 0],
-          [0, 0, 0, 0, 0, 0, 0, 8, 0],
-          [0, 2, 0, 0, 1, 0, 7, 5, 0],
-          [3, 8, 0, 0, 7, 0, 0, 4, 2]]
-
-    m1 = [[7, 8, 0, 4, 0, 0, 1, 2, 0],
-          [6, 0, 0, 0, 7, 5, 0, 0, 9],
-          [0, 0, 0, 6, 0, 1, 0, 7, 8],
-          [0, 0, 7, 0, 4, 0, 2, 6, 0],
-          [0, 0, 1, 0, 5, 0, 9, 3, 0],
-          [9, 0, 4, 0, 6, 0, 0, 0, 5],
-          [0, 7, 0, 3, 0, 0, 0, 1, 2],
-          [1, 2, 0, 0, 0, 7, 4, 0, 0],
-          [0, 4, 9, 2, 0, 6, 0, 0, 7]
-          ]
+    m1 = [
+        [7, 8, 0, 4, 0, 0, 1, 2, 0],
+        [6, 0, 0, 0, 7, 5, 0, 0, 9],
+        [0, 0, 0, 6, 0, 1, 0, 7, 8],
+        [0, 0, 7, 0, 4, 0, 2, 6, 0],
+        [0, 0, 1, 0, 5, 0, 9, 3, 0],
+        [9, 0, 4, 0, 6, 0, 0, 0, 5],
+        [0, 7, 0, 3, 0, 0, 0, 1, 2],
+        [1, 2, 0, 0, 0, 7, 4, 0, 0],
+        [0, 4, 9, 2, 0, 6, 0, 0, 7],
+    ]
 
     def __init__(self, rows, columns, w, h, board):
-
         self.board = board
         self.rows = rows
         self.columns = columns
         # Each square has a set value
-        self.squares = [[Square(i, j, w, h, self.board[i][j]) for j in range(columns)] for i in range(rows)]
+        self.squares = [
+            [
+                Square(
+                    i,
+                    j,
+                    w,
+                    h,
+                    self.board[i][j],
+                    True if self.board[i][j] > 0 else False,
+                )
+                for j in range(columns)
+            ]
+            for i in range(rows)
+        ]
         self.w = w
         self.h = h
         self.model = self.board
@@ -53,7 +73,9 @@ class Board(Square):
             self.squares[row][column].set_value(value)
             self.update_board()
             # checks if It's correct
-            if is_valid(self.board, value, (row, column)) and complete_sudoku(self.board.copy()):
+            if is_valid(self.board, value, (row, column)) and complete_sudoku(
+                self.board.copy()
+            ):
                 print(show_sudoku(self.board))
                 return True
             # Resets the value
@@ -80,7 +102,9 @@ class Board(Square):
             self.squares[row][column].set_value(value)
             self.update_board()
             # checks if It's correct
-            if is_valid(self.board, value, (row, column)) and complete_sudoku(self.board):
+            if is_valid(self.board, value, (row, column)) and complete_sudoku(
+                self.board
+            ):
                 return True
             # Resets the value
             else:
@@ -90,7 +114,6 @@ class Board(Square):
                 return False
 
     def complete_GUI(self, empty):
-
         while empty:
             print(empty)
             y, x = empty[0]
@@ -102,7 +125,10 @@ class Board(Square):
 
     # Updates the values of each square
     def update_board(self):
-        self.board = [[self.squares[i][j].value for j in range(self.columns)] for i in range(self.rows)]
+        self.board = [
+            [self.squares[i][j].value for j in range(self.columns)]
+            for i in range(self.rows)
+        ]
 
     # If another square is clicked, the previous one will stop returning self.clicked = True.
     def clicked_handler(self, row, column):
@@ -134,10 +160,10 @@ class Board(Square):
         if p[0] - lm < self.w and p[1] - tm < self.h:
             sep = self.sep
             # parsing required to make it more convenient for the square position
-            
+
             x = int((p[0] + -lm) // sep)
-            y = int((p[1] + -tm )// sep)
-            if (y < 0):
+            y = int((p[1] + -tm) // sep)
+            if y < 0:
                 return None
             return (y, x)
         # clicked out of the specified bounds
@@ -150,8 +176,12 @@ class Board(Square):
             # specifies the thickness of each line
             if not i % 3:
                 t = 3
-            pygame.draw.line(win, (0, 0, 0), (lm, i * sep + tm), (self.w + lm, i * sep + tm), t)
-            pygame.draw.line(win, (0, 0, 0), (i * sep + lm, tm), (i * sep + lm, self.h + tm), t)
+            pygame.draw.line(
+                win, (0, 0, 0), (lm, i * sep + tm), (self.w + lm, i * sep + tm), t
+            )
+            pygame.draw.line(
+                win, (0, 0, 0), (i * sep + lm, tm), (i * sep + lm, self.h + tm), t
+            )
         # Renders each square with render(window) from the Square class
         for i in range(self.rows):
             for j in range(self.columns):

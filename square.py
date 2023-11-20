@@ -1,20 +1,19 @@
 import pygame
 
-screen = pygame.display.set_mode((720, 720))
-# Margins
+screen = pygame.display.set_mode((900, 800))
 # left margin
-lm = 230
+lm = 150
 # top margin
-tm = 200
+tm = 100
 
 
 class Square:
-
-    def __init__(self,  row, column, w, h, value):
+    def __init__(self, row, column, w, h, value, base):
         self.row = row
         self.temp_value = 0
         self.column = column
         self.value = value
+        self.base = base
         self.w = w
         self.h = h
         self.clicked = False
@@ -27,13 +26,33 @@ class Square:
         x = self.column * separation + lm
         y = self.row * separation + tm
         if self.temp_value != 0 and self.value == 0:
-            output = temp_font.render(str(self.temp_value), 1, (255, 255, 255))
-            scr.blit(output, (
-                x + (separation / 5 - output.get_width() / 2.8), y + (separation / 1.4 - output.get_height() / 1)))
-        elif self.value != 0:
+            output = temp_font.render(str(self.temp_value), 1, (255, 0, 0))
+            scr.blit(
+                output,
+                (
+                    x + (separation / 2.1 - output.get_width() / 2),
+                    y + (separation / 2.1 - output.get_height() / 2),
+                ),
+            )
+        elif self.value != 0 and self.base == True:
             output = font.render(str(self.value), 1, (0, 0, 0))
-            scr.blit(output, (
-                x + (separation / 2.1 - output.get_width() / 2), y + (separation / 2.1 - output.get_height() / 2)))
+            scr.blit(
+                output,
+                (
+                    x + (separation / 2.1 - output.get_width() / 2),
+                    y + (separation / 2.1 - output.get_height() / 2),
+                ),
+            )
+        elif self.value != 0 and self.base == False:
+            output = font.render(str(self.value), 1, (0, 0, 0))
+
+            scr.blit(
+                output,
+                (
+                    x + (separation / 2.1 - output.get_width() / 2),
+                    y + (separation / 2.1 - output.get_height() / 2),
+                ),
+            )
         if self.clicked:
             pygame.draw.rect(screen, (255, 0, 0), (x, y, separation, separation), 4)
 
