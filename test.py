@@ -1,12 +1,32 @@
-from logic.Grid import Grid
-from logic.BackTracking import BackTracking
+from sudoku import *
+from logic.BFS_solver import BFS_solve
+from logic.DFS_solver import DFS_solve
 
 if __name__ == "__main__":
-    # Read the Sudoku puzzle from the file
-    sudoku_file = "./solution/example1.txt"
-    grid_size = 9
+    print ("\n\nTesting on invalid 9x9 grid...")
+    grid = [[7, 8, 0, 4, 0, 0, 1, 2, 0],
+            [6, 0, 0, 0, 7, 5, 0, 0, 9],
+            [0, 0, 0, 6, 0, 1, 0, 7, 8],
+            [0, 0, 7, 0, 4, 0, 2, 6, 0],
+            [0, 0, 1, 0, 5, 0, 9, 3, 0],
+            [9, 0, 4, 0, 6, 0, 0, 0, 5],
+            [0, 7, 0, 3, 0, 0, 0, 1, 2],
+            [1, 2, 0, 0, 0, 7, 4, 0, 0],
+            [0, 4, 9, 2, 0, 6, 0, 0, 7]]
+    # grid = [['C','.','G','.','.','.','.','A','.'], 
+    #         ['.','.','.','H','.','E','.','.','F'],
+    #         ['I','.','.','.','G','.','.','.','D'],
+    #         ['.','.','H','.','E','.','.','.','.'],
+    #         ['B','.','.','F','.','H','.','.','C'],
+    #         ['.','.','.','.','I','.','E','.','.'],
+    #         ['H','.','.','.','A','.','.','.','G'],
+    #         ['F','.','.','I','.','D','.','.','.'],
+    #         ['.','C','.','.','.','.','I','.','H']]
+    show_sudoku(grid)
+    t = DFS_solve(grid)
+    
+    # complete_sudoku(grid)
+    show_sudoku(t)
 
-    sudoku_grid = Grid(grid_size)
-    sudoku_solver = BackTracking(sudoku_grid)
-    sudoku_solver.solve(sudoku_file)
+
 
