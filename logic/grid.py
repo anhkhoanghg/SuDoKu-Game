@@ -180,26 +180,37 @@ class Grid:
                     self.deduce_val_cell((row, col))
 
     # Read sudoku grid
-    def read_grid(self, sudoku_file):
-        input_grid = open(sudoku_file, "r")
+    # def read_grid(self, sudoku_file):
+    #     input_grid = open(sudoku_file, "r")
 
-        for row, vals in enumerate(input_grid.readlines()):
-            if len(vals) - 1 != self.grid_size:
-                input_grid.close()
-                return False
+    #     for row, vals in enumerate(input_grid.readlines()):
+    #         if len(vals) - 1 != self.grid_size:
+    #             input_grid.close()
+    #             return False
 
-            for col in range(self.grid_size):
-                val = vals[col]
+    #         for col in range(self.grid_size):
+    #             val = vals[col]
 
-                # Not valid sudoku value
-                if not (vals[col] == '-' or (val.isdigit() and 1 <= int(val) <= self.grid_size)):
-                    input_grid.close()
+    #             # Not valid sudoku value
+    #             if not (vals[col] == '-' or (val.isdigit() and 1 <= int(val) <= self.grid_size)):
+    #                 input_grid.close()
+    #                 return False
+
+    #             if val != '-':
+    #                 self.set_cell_val((row, col), int(val))
+
+    #     input_grid.close()
+    #     return True
+
+    def read_grid(self, board):
+        if len(board[0]) != self.grid_size:
+            return False
+        for row in range(len(board[0])):
+            for col in range(len(board[0])):
+                if not (0 <= int(board[row][col]) <= self.grid_size):
                     return False
-
-                if val != '-':
-                    self.set_cell_val((row, col), int(val))
-
-        input_grid.close()
+                if board[row][col] != 0:
+                    self.set_cell_val((row, col), int(board[row][col]))
         return True
 
     def print(self):
@@ -233,3 +244,13 @@ class Grid:
                     return False
 
         return True
+    
+    def turn_2d_array(self):
+        arr_2d = [[0] * self.grid_size for _ in range(self.grid_size)]
+        for row in range(self.grid_size):
+            for col in range(self.grid_size):
+                val = self.grid[row][col]
+                arr_2d[row][col] = val.get_val()
+        return arr_2d
+                
+    

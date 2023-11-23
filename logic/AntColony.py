@@ -5,15 +5,14 @@ import copy
 
 
 class AntSolver:
-    def __init__(self, grid, global_pher_update, best_pher_evaporation, num_of_ants, gui, gui_active):
+    def __init__(self, grid, global_pher_update, best_pher_evaporation, num_of_ants):
         # Grid
         self.grid = grid
 
         self.global_pher_update = global_pher_update
         self.best_pher_evaporation = best_pher_evaporation
         self.num_of_ants = num_of_ants
-        self.gui = gui
-        self.gui_active = gui_active
+
 
         # Array of ants
         self.ants = [Ant() for i in range(self.num_of_ants)]
@@ -60,9 +59,6 @@ class AntSolver:
         cycle = 1
 
         while not solved:
-            if not self.gui_active:
-                print("cycle: ", cycle)
-
             for i in range(self.num_of_ants):
                 # Randomly selected position where ant will start solving sudoku
                 start_pos = (random.randint(0, self.grid.grid_size - 1), random.randint(0, self.grid.grid_size - 1))
@@ -86,13 +82,9 @@ class AntSolver:
                 # Sudoku is solved
                 if num_fixed == self.grid.cell_cnt:
                     self.solution = ant.grid
-
-                    if self.gui_active:
-                        self.gui.screen_with_message(self.solution, "", False, cycle, self.pher_matrix)
-                    else:
-                        self.solution.print()
-                        print(self.solution.fixed_cell_cnt, "fixed cells")
-                        # self.print_pher_matrix()
+                    self.solution.print()
+                    print(self.solution.fixed_cell_cnt, "fixed cells")
+                    self.print_pher_matrix()
 
                     return self.solution
 
@@ -112,12 +104,10 @@ class AntSolver:
 
             # Do best value evaporation
             self.best_pher_to_add *= (1 - self.best_pher_evaporation)
-
-            if self.gui_active:
-                self.gui.screen_with_message(self.solution, "", False, cycle, self.pher_matrix)
-            else:
-                self.solution.print()
-                print(self.solution.fixed_cell_cnt, "fixed cells")
-                # self.print_pher_matrix()
+            self.solution.print()
+            print(self.solution.fixed_cell_cnt, "fixed cells")
+            self.print_pher_matrix()
 
             cycle += 1
+        return self.solution
+
