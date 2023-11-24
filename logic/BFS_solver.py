@@ -3,7 +3,7 @@ import copy
 import time
 from logic.letters_transform import to_letters, to_numbers, check_if_letters
 
-class Problem(object):
+class BFSProblem(object):
 
     def __init__(self, initial):
         self.initial = initial
@@ -84,7 +84,7 @@ class Problem(object):
 
         return True
 
-class Node:
+class BFSNode:
 
     def __init__(self, state, action=None):
         self.state = state
@@ -96,10 +96,10 @@ class Node:
 
     def child_node(self, problem, action):
         next = problem.result(self.state, action)
-        return Node(next, action)
+        return BFSNode(next, action)
 
 def BFS(problem):
-    node = Node(problem.initial)
+    node = BFSNode(problem.initial)
     if problem.check_legal(node.state):
         return node, 0 
 
@@ -128,7 +128,7 @@ def BFS_solve(board):
 
     start_time = time.time()
 
-    problem = Problem(board)
+    problem = BFSProblem(board)
     solution, nodes_expanded = BFS(problem)
     elapsed_time = time.time() - start_time
 
@@ -141,6 +141,6 @@ def BFS_solve(board):
 
     print ("Elapsed time: " + str(elapsed_time) + " seconds")
     print ("Node_Expanded: " + str(nodes_expanded) + " nodes")
-    return solution.state
+    return solution.state, nodes_expanded, elapsed_time
     
     

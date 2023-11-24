@@ -1,7 +1,8 @@
-# from sudoku import *
-# from logic.BFS_solver import BFS_solve
-# from logic.DFS_solver import DFS_solve
+from sudoku import *
+from logic.BFS_solver import BFS_solve
+from logic.DFS_solver import DFS_solve
 from logic.Grid import Grid
+from logic.UCS_solver import UCS_solve
 
 if __name__ == "__main__":
     print ("\n\nTesting on invalid 9x9 grid...")
@@ -24,9 +25,9 @@ if __name__ == "__main__":
     #         ['F','.','.','I','.','D','.','.','.'],
     #         ['.','C','.','.','.','.','I','.','H']]
     # show_sudoku(grid)
-    # t = DFS_solve(grid)
+    t = BFS_solve(grid)
     
-    # # complete_sudoku(grid)
-    # show_sudoku(t)
+    complete_sudoku(grid)
+    show_sudoku(t)
     
-    Grid.read_grid(sudoku_file="./solution/example1.txt")
+

@@ -1,8 +1,20 @@
 import copy
 import time
-from letters_transform import to_letters, to_numbers, check_if_letters
+from logic.letters_transform import to_letters, to_numbers, check_if_letters
+from queue import PriorityQueue
 
-class Problem(object):
+class SudokuHeuristic:
+    @staticmethod
+    def count_filled_cells(board):
+        return sum(1 for row in board for cell in row if cell != 0)
+
+    @staticmethod
+    def heuristic(board):
+        # Count the number of filled cells in the puzzle
+        return SudokuHeuristic.count_filled_cells(board)
+    
+    
+class AProblem(object):
 
     def __init__(self, initial):
         self.initial = initial
@@ -90,49 +102,113 @@ class Problem(object):
             new_state = copy.deepcopy(state) 
             new_state[row][column] = number
             yield new_state
+            
+    def heuristic(self, state):
+        return SudokuHeuristic.heuristic(state)
 
-class Node:
+# class Node:
     
-    def __init__(self, state):
+#     def __init__(self, state):
+#         self.state = state
+
+#     def expand(self, problem):
+#         return [Node(state) for state in problem.actions(self.state)]
+
+# def DFS(problem):
+#     start = Node(problem.initial)
+#     if problem.check_legal(start.state):
+#         return start.state
+
+#     stack = []
+#     stack.append(start) 
+
+#     while stack: 
+#         node = stack.pop() 
+#         if problem.check_legal(node.state):
+#             return node.state
+#         stack.extend(node.expand(problem)) 
+#     return None
+
+class ANode:
+    def __init__(self, state, cost, heuristic):
         self.state = state
+        self.cost = cost
+        self.heuristic = heuristic
 
-    def expand(self, problem):
-        return [Node(state) for state in problem.actions(self.state)]
+    def __lt__(self, other):
+        return (self.cost + self.heuristic) < (other.cost + other.heuristic)
 
-def DFS(problem):
-    start = Node(problem.initial)
+def a_star(problem):
+    start = ANode(problem.initial, 0, problem.heuristic(problem.initial))
     if problem.check_legal(start.state):
-        return start.state
+        return start.state, 0
 
-    stack = []
-    stack.append(start) 
+    open_set = PriorityQueue()
+    open_set.put(start)
+    nodes_expanded = 0
+    closed_set = set()
 
-    while stack: 
-        node = stack.pop() 
+    while not open_set.empty():
+        node = open_set.get()
+        nodes_expanded += 1
+
         if problem.check_legal(node.state):
-            return node.state
-        stack.extend(node.expand(problem)) 
-    return None
+            return node.state, nodes_expanded
 
-def H_Solve(board):
-    print ("\nSolving with DFS and heuristics...")
+        closed_set.add(tuple(map(tuple, node.state)))
+
+        for successor_state in problem.actions(node.state):
+            successor = ANode(successor_state, node.cost + 1, problem.heuristic(successor_state))
+
+            if tuple(map(tuple, successor.state)) not in closed_set:
+                open_set.put(successor)
+
+    return None, nodes_expanded
+
+def a_star_solve(board):
+    print("\nSolving with A*...")
     letters = False
-    if check_if_letters(board): # Checks of the board contains letters instead of numbers
-        board = to_numbers(board) # Transforms letter puzzles to numeric puzzles
+    if check_if_letters(board):
+        board = to_numbers(board)
         letters = True
 
     start_time = time.time()
-    problem = Problem(board)
-    solution = DFS(problem)
+    problem = AProblem(board)
+    solution, nodes_expanded = a_star(problem)
     elapsed_time = time.time() - start_time
 
     if solution:
         if letters:
-            solution = to_letters(solution) # Transforms back numeric puzzles to original letter puzzle type of true
-        print ("Found solution")
-        for row in solution:
-            print (row)
+            solution = to_letters(solution)
+        print("Found solution")
     else:
-        print ("No possible solutions")
+        print("No possible solutions")
+        return False
 
-    print ("Elapsed time: " + str(elapsed_time) + " seconds")
+    print("Nodes expanded: {}".format(nodes_expanded))
+    print("Elapsed time: {:.6f} seconds".format(elapsed_time))
+    return solution, nodes_expanded, elapsed_time
+
+
+# def H_Solve(board):
+#     print ("\nSolving with DFS and heuristics...")
+#     letters = False
+#     if check_if_letters(board): # Checks of the board contains letters instead of numbers
+#         board = to_numbers(board) # Transforms letter puzzles to numeric puzzles
+#         letters = True
+
+#     start_time = time.time()
+#     problem = Problem(board)
+#     solution = DFS(problem)
+#     elapsed_time = time.time() - start_time
+
+#     if solution:
+#         if letters:
+#             solution = to_letters(solution) # Transforms back numeric puzzles to original letter puzzle type of true
+#         print ("Found solution")
+#         for row in solution:
+#             print (row)
+#     else:
+#         print ("No possible solutions")
+
+#     print ("Elapsed time: " + str(elapsed_time) + " seconds")

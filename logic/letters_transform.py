@@ -67,19 +67,4 @@ def to_letters(numbergrid):
         blanklist.clear()
     return lettergrid
 
-def to_letters_ant(numbergrid):
-    
-    gridSize = numbergrid
-    numKeys = [num for num in range(1,gridSize+1)]
-    letterValues = list(map(chr, range(ord('A'), ord('A')+gridSize+1)))
-    alphanumDict = dict(zip(numKeys, letterValues))
-    alphanumDict[0] = '.'
-
-    lettergrid = [[] for new_list in range(gridSize)]
-    blanklist = []
-    for row in range(gridSize):
-        for column in range(gridSize):
-            blanklist.append(get_val(alphanumDict, numbergrid[row][column]))
-        lettergrid[row].extend(blanklist)
-        blanklist.clear()
-    return lettergrid
+ 

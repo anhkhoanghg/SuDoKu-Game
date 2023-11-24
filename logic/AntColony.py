@@ -1,7 +1,11 @@
 from logic.Ant import Ant
-
+from logic.letters_transform import to_letters, to_numbers, check_if_letters
+from logic.Grid import Grid
 import random
 import copy
+import time
+from constant import *
+
 
 
 class AntSolver:
@@ -28,6 +32,17 @@ class AntSolver:
 
         self.solution = self.grid
         self.best_pher_to_add = 0
+        self.explored_nodes = 0
+        self.start_time = 0
+
+    def reset_statistics(self):
+        self.explored_nodes = 0
+        self.start_time = time.time()
+
+    def print_statistics(self):
+        elapsed_time = time.time() - self.start_time
+        print(f"Explored Nodes: {self.explored_nodes}")
+        print(f"Time Taken: {elapsed_time:.4f} seconds")
 
     def print_pher_matrix(self):
         print("Pheromone matrix:")
@@ -57,6 +72,7 @@ class AntSolver:
     def solve(self, local_pher_update, greediness):
         solved = False
         cycle = 1
+        self.reset_statistics()
 
         while not solved:
             for i in range(self.num_of_ants):
@@ -71,6 +87,7 @@ class AntSolver:
             for step in range(self.grid.cell_cnt):
                 for ant in self.ants:
                     ant.step()
+                    self.explored_nodes += 1
 
             # Find best performing ant
             best_ant_fixed_cnt = 0
@@ -85,7 +102,7 @@ class AntSolver:
                     self.solution.print()
                     print(self.solution.fixed_cell_cnt, "fixed cells")
                     self.print_pher_matrix()
-
+                    self.print_statistics()
                     return self.solution
 
                 # New best
@@ -109,5 +126,33 @@ class AntSolver:
             self.print_pher_matrix()
 
             cycle += 1
-        return self.solution
+
+        return self.solution, self.explored_nodes
+
+def ACO_solve(board):
+    print("\nSolving with ACO...")
+    start_time = time.time()
+
+    letters = False
+    if check_if_letters(board):
+        board = to_numbers(board)
+        letters = True
+    gr = Grid(grid_size=GRID_SIZE)
+    gr.read_grid(board=board)
+    gr.propagate_constraints_all_cells()
+    gr.deduce_vals_all_cells()
+    if gr.not_solvable():
+        print("Sudoku not solvable")
+        return False
+    solver = AntSolver(grid=gr, global_pher_update=GLOBAL_PHER_UPDATE, best_pher_evaporation=BEST_PHER_EVAPORATION, num_of_ants=NUM_OF_ANTS)
+    s, explored_nodes = solver.solve(LOCAL_PHER_UPDATE, GREEDINESS)
+    elapsed_time = time.time() - start_time
+    if s:
+        solution = s.turn_2d_array()
+        if letters == True:
+            solution = to_letters(solution)
+        else:
+            pass
+    return solution, explored_nodes, elapsed_time
+
 

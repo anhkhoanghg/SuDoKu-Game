@@ -1,8 +1,9 @@
 import copy
 import time
+import heapq
 from logic.letters_transform import to_letters, to_numbers, check_if_letters
 
-class DFSProblem(object):
+class UCSProblem(object):
 
     def __init__(self, initial):
         self.initial = initial
@@ -71,54 +72,55 @@ class DFSProblem(object):
         return options    
 
     def actions(self, state):
-        row,column = self.get_spot(self.size, state) 
+        row, column = self.get_spot(self.size, state)
         options = self.filter_row(state, row)
         options = self.filter_col(options, state, column)
         options = self.filter_quad(options, state, row, column)
 
-
         for number in options:
             new_state = copy.deepcopy(state)
             new_state[row][column] = number
-            yield new_state
+            yield new_state, 1 
 
-class DFSNode:
-    def __init__(self, state):
+class UCSNode:
+    def __init__(self, state, cost):
         self.state = state
+        self.cost = cost
 
-    def expand(self, problem):
-        return [DFSNode(state) for state in problem.actions(self.state)]
+    def __lt__(self, other):
+        return self.cost < other.cost
 
-def DFS(problem):
-    start = DFSNode(problem.initial)
+def UCS(problem):
+    start = UCSNode(problem.initial, 0)
     if problem.check_legal(start.state):
         return start.state, 0  
 
-    stack = []
-    stack.append(start)
-    nodes_expanded = 0 
+    heap = []
+    heapq.heappush(heap, start)
+    nodes_expanded = 0
 
-    while stack:
-        node = stack.pop()
-        nodes_expanded += 1  
+    while heap:
+        node = heapq.heappop(heap)
+        nodes_expanded += 1
 
         if problem.check_legal(node.state):
             return node.state, nodes_expanded
 
-        stack.extend(node.expand(problem))
+        for successor, cost in problem.actions(node.state):
+            heapq.heappush(heap, UCSNode(successor, node.cost + cost))
 
     return None, nodes_expanded
 
-def DFS_solve(board):
-    print("\nSolving with DFS...")
+def UCS_solve(board):
+    print("\nSolving with UCS...")
     letters = False
     if check_if_letters(board):
         board = to_numbers(board)
         letters = True
 
     start_time = time.time()
-    problem = DFSProblem(board)
-    solution, nodes_expanded = DFS(problem)
+    problem = UCSProblem(board)
+    solution, nodes_expanded = UCS(problem)
     elapsed_time = time.time() - start_time
 
     if solution:

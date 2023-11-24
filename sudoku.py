@@ -49,7 +49,7 @@ def is_empty(game_board):
     return False
 
 # n = number or input and p = position in the board in terms of the row and column
-def is_valid(game_board, n, p):
+def is_valid_board(game_board, n, p):
     # Check the rows
     for i in range(len(game_board[0])):
         if game_board[p[0]][i] == n and p[1] != i:
@@ -77,7 +77,7 @@ def complete_sudoku(game_board):
         y, x = empty
         for i in range(1, 10):
 
-            if is_valid(game_board, i, (y, x)):
+            if is_valid_board(game_board, i, (y, x)):
                 game_board[y][x] = i
 
                 if complete_sudoku(game_board):
@@ -116,7 +116,7 @@ def generate_random_sudoku():
         rand_sudoku[r1][r2] = v
         values_list.append((r1, r2))
         #Backtracking
-        if is_valid(rand_sudoku, rand_sudoku[r1][r2], (r1, r2)) == False:
+        if is_valid_board(rand_sudoku, rand_sudoku[r1][r2], (r1, r2)) == False:
             rand_sudoku[r1][r2] = 0
             values_list.remove((r1, r2))
             filled_box -= 1
