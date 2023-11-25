@@ -127,7 +127,7 @@ class AntSolver:
 
             cycle += 1
 
-        return self.solution, self.explored_nodes
+        return self.solution, cycle
 
 def ACO_solve(board):
     print("\nSolving with ACO...")
@@ -145,7 +145,7 @@ def ACO_solve(board):
         print("Sudoku not solvable")
         return False
     solver = AntSolver(grid=gr, global_pher_update=GLOBAL_PHER_UPDATE, best_pher_evaporation=BEST_PHER_EVAPORATION, num_of_ants=NUM_OF_ANTS)
-    s, explored_nodes = solver.solve(LOCAL_PHER_UPDATE, GREEDINESS)
+    s = solver.solve(LOCAL_PHER_UPDATE, GREEDINESS)
     elapsed_time = time.time() - start_time
     if s:
         solution = s.turn_2d_array()
@@ -153,6 +153,6 @@ def ACO_solve(board):
             solution = to_letters(solution)
         else:
             pass
-    return solution, explored_nodes, elapsed_time
+    return solution, elapsed_time
 
 

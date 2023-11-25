@@ -7,6 +7,7 @@ from logic.AntColony import AntSolver
 from logic.AntColony import ACO_solve
 from logic.Heuristic_solvers import a_star_solve
 from sudoku import show_sudoku
+from logic.HillClimbing import hl_solve
 
 # board = [[7, 8, 5, 4, 3, 9, 1, 2, 6],
 #         [6, 1, 2, 8, 7, 5, 3, 4, 9],
@@ -35,10 +36,10 @@ grid = [['C','.','G','.','.','.','.','A','.'],
         ['H','.','.','.','A','.','.','.','G'],
         ['F','.','.','I','.','D','.','.','.'],
         ['.','C','.','.','.','.','I','.','H']]
-# t = to_letters(board)
+# t = to_letters(grid)
 # show_sudoku(t)
 # gr = Grid(grid_size=GRID_SIZE)
-# gr.read_grid(board=board)
+# gr.read_grid(board=grid)
 # gr.propagate_constraints_all_cells()
 # gr.deduce_vals_all_cells()
 # msg = ''
@@ -56,7 +57,7 @@ grid = [['C','.','G','.','.','.','.','A','.'],
 # else:
 #     print("ACO not good")
 
-s = a_star_solve(board=grid)
+s = hl_solve(board=grid)
 print("ssss")
 
 
