@@ -186,6 +186,8 @@ class Board(Square):
         for i in range(self.rows):
             for j in range(self.columns):
                 self.squares[i][j].render(win)
+                
+        self.filler_square(win)
 
     # No value makes the square empty
     def clear(self):
@@ -193,3 +195,10 @@ class Board(Square):
         if self.squares[row][column].value == 0:
             self.squares[row][column].set_temp_value(0)
 
+    def filler_square(self, win):
+        if self.clicked != False: 
+            row, col = self.clicked
+            for x in range(self.rows):
+                for y in range(self.columns):
+                    if self.squares[x][y].value == self.squares[row][col].value:
+                        self.squares[x][y].fill_cell_color(win)

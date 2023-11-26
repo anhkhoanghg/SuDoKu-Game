@@ -55,6 +55,21 @@ class Square:
             )
         if self.clicked:
             pygame.draw.rect(screen, (50, 90, 155), (x, y, separation, separation), 4)
+            
+    def fill_cell_color(self, scr ):
+        font = pygame.font.SysFont("Arial", 50)
+        separation = self.w / 9
+        x = self.column * separation + lm
+        y = self.row * separation + tm
+        if (self.value != 0):
+            output = font.render(str(self.value), 1, (255, 90, 200))
+            scr.blit(
+                output,
+                (
+                    x + (separation / 2.1 - output.get_width() / 2),
+                    y + (separation / 2.1 - output.get_height() / 2),
+                ),
+            )
 
     # Sets a value for the square
     def set_value(self, value):

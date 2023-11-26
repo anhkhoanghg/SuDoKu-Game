@@ -1,7 +1,9 @@
 import os
 import pygame
 from sudoku import generate_random_sudoku, show_sudoku
+import math
 import tkinter as tk
+from tkinter import ttk
 from tkinter import messagebox
 import time
 from board import Board
@@ -24,6 +26,7 @@ class Game(Board):
         # Difficulty menu state
         self.difficulty_state = False
         # Start section state
+        self.random_sudoku = generate_random_sudoku("easy")
         self.start_state = False
         self.w, self.h = 900, 780
         self.display = pygame.Surface((self.w, self.h))
@@ -36,6 +39,11 @@ class Game(Board):
         self.strikes = 0
         self.key = None
         self.menu_state = True
+        self.dropdown_expanded = False
+        self.algorithm_selected = ""
+        self.dropdown_options = ["ACO", "BFS", "DFS", "UCS", "A*"]
+        self.explored_nodes = ""
+        self.elapsed_time = ""
         # General cursor
         # avoid multiple menu selections in a row
         self.transition = False
@@ -80,11 +88,30 @@ class Game(Board):
 
         # Create menu
         menu = fnt.render("M = Back to Menu", 1, (255, 255, 255, 1))
+        
+        # Create dropdown
+        selected_button = pygame.font.SysFont("comicsans", 20).render((self.algorithm_selected + " Algorithm") if self.algorithm_selected else "Select algorithm", True, (0,0,0))
+        
+        pygame.draw.rect(self.window, (200, 200, 200) if self.dropdown_expanded else (255, 255, 255), pygame.Rect(635, 580, 250, 40))
+        pygame.draw.rect(self.window, (0, 0, 0), pygame.Rect(635, 580, 250, 40), 2)
         # complete = fnt.render("Press C to complete the board", 1, (0, 0, 0, 1))
         pygame.draw.circle(self.window, (0, 0, 0, 1), (110, 920), 80)
         pygame.draw.circle(self.window, (0, 0, 0, 1), (int(self.w // 1.11), 920), 80)
         pygame.draw.rect(self.window, (0, 0, 0, 1), pygame.Rect(100, 840, 880, 160))
+        
+        # Result algorithm
+        explored_nodes_result = pygame.font.SysFont("comicsans", 20).render("Explored nodes: ", True, (0,0,0))
+        time_taken_result = pygame.font.SysFont("comicsans", 20).render("Elapsed time: ", True, (0,0,0))
+        
+        explored_nodes_text = pygame.font.SysFont("comicsans", 20).render(str(self.explored_nodes), True, (0,0,0))
+        elapsed_time_text = pygame.font.SysFont("comicsans", 20).render(str(self.elapsed_time), True, (0,0,0))
         # render into window
+        # Draw selected option
+        self.window.blit(explored_nodes_text, (640, 125))
+        self.window.blit(elapsed_time_text, (640, 205))
+        self.window.blit(explored_nodes_result, (640, 100))
+        self.window.blit(time_taken_result, (640, 180))
+        self.window.blit(selected_button, (685, 585))
         self.window.blit(solve_button_surface, (200, 655))
         self.window.blit(solve_button, (230, 660))
         self.window.blit(time, (635, 25))
@@ -94,6 +121,16 @@ class Game(Board):
         chance = fnt2.render("X ", 2, (76, 175, 80, 1))
         position = []
         position2 = []
+        
+        # Draw dropdown options if expanded
+        if self.dropdown_expanded:
+            for i, option in enumerate(self.dropdown_options):
+                option_rect = pygame.Rect(pygame.Rect(635, 580, 250, 40).x, pygame.Rect(635, 580, 250, 40).y - (len(self.dropdown_options) - i) * 40, pygame.Rect(635, 580, 250, 40).width, 40)
+                pygame.draw.rect(self.window, (200, 200, 200), option_rect)
+                pygame.draw.rect(self.window, (0, 0, 0), option_rect, 2)
+                option_text = pygame.font.SysFont("comicsans", 20).render(option, True, (0, 0, 0))
+                self.window.blit(option_text, (pygame.Rect(635, 580, 250, 40).x + 5, pygame.Rect(635, 580, 250, 40).y - (len(self.dropdown_options) - i) * 40 + 5))
+        
         # Updates the chances and strikes
         for i in range(self.chances):
             position2.append((self.w - 65, 10 + (i * 50) + lm))
@@ -255,7 +292,12 @@ class Game(Board):
         minute = secs // 60
         time = " " + str(minute) + ":" + (str(sec) if (sec >= 10) else "0" + str(sec))
         return time
-
+    
+    def render_statistics_results(self, nodes, time):
+        self.explored_nodes = nodes
+        self.elapsed_time = round(time, 4)
+        pygame.display.update()
+        
     # Manages all user inputs/ events for the playing mode
     def main_event_handler(self):
         root = tk.Tk()
@@ -275,9 +317,6 @@ class Game(Board):
                 # Inserting temporary value handler
                 if e.key == pygame.K_1:
                     self.key = 1
-                    self.menu_state = False
-                    self.difficulty_state = False
-                    self.playing = True
                 if e.key == pygame.K_2:
                     self.key = 2
                 if e.key == pygame.K_3:
@@ -354,6 +393,92 @@ class Game(Board):
                     if clicked:
                         self.board.clicked_handler(clicked[0], clicked[1])
                         self.key = None
+                        
+                    # Solve button clicked
+                    solve_button = pygame.font.SysFont("comicsans", 40).render("Solve game by algorithm", 1, (0, 0, 0, 255))
+                    button_width = solve_button.get_width() + 60
+                    button_height = solve_button.get_height() + 20
+                    if (
+                        pos[0] > 200 and pos[0] < 200 + button_width and
+                        pos[1] > 655 and pos[1] < 655 + button_height
+                    ):
+                        print(f"Run algorithm {self.algorithm_selected}")
+                        
+                        if (self.algorithm_selected == "ACO"):
+                            print (self.algorithm_selected)
+                            solution, nodes_expand, time = ACO_solve(self.random_sudoku)
+                            show_sudoku(solution)
+                            self.render_statistics_results(nodes_expand, time)
+                        elif (self.algorithm_selected == "BFS"):
+                            solution, nodes_expand, time = BFS_solve(self.random_sudoku)
+                            show_sudoku(solution)
+                            self.render_statistics_results(nodes_expand, time)
+                        elif (self.algorithm_selected == "DFS"):
+                            solution, nodes_expand, time = DFS_solve(self.random_sudoku)
+                            show_sudoku(solution)
+                            self.render_statistics_results(nodes_expand, time)
+                        elif (self.algorithm_selected == "UCS"):
+                            solution, nodes_expand, time = UCS_solve(self.random_sudoku)
+                            show_sudoku(solution)
+                            self.render_statistics_results(nodes_expand, time)
+                        elif (self.algorithm_selected == "A*"):
+                            solution, nodes_expand, time = a_star_solve(self.random_sudoku)
+                            show_sudoku(solution)
+                            self.render_statistics_results(nodes_expand, time)
+                    if (
+                        pos[0] > 635 and pos[0] < 635 + 250 and
+                        pos[1] > 580 and pos[1] < 580 + 40
+                    ):
+                        if self.dropdown_expanded:
+                            self.dropdown_expanded = False
+                        else:
+                            self.dropdown_expanded = True
+                        
+                    # Event click option
+                    if (
+                        pos[0] > 635 and pos[0] < 635 + 250 and
+                        pos[1] > 580 - 1 * 40 and pos[1] < 580 + 40 - 1 * 40 and
+                        self.dropdown_expanded == True
+                    ):
+                        self.algorithm_selected = "A*"
+                        self.dropdown_expanded = False
+                        print(self.algorithm_selected)
+                        
+                    if (
+                        pos[0] > 635 and pos[0] < 635 + 250 and
+                        pos[1] > 580 - 2 * 40 and pos[1] < 580 + 40 - 2 * 40 and
+                        self.dropdown_expanded == True
+                    ):
+                        self.algorithm_selected = "UCS"
+                        self.dropdown_expanded = False
+                        print(self.algorithm_selected)
+                        
+                    if (
+                        pos[0] > 635 and pos[0] < 635 + 250 and
+                        pos[1] > 580 - 3 * 40 and pos[1] < 580 + 40 - 3 * 40 and
+                        self.dropdown_expanded == True
+                    ):
+                        self.algorithm_selected = "DFS"
+                        self.dropdown_expanded = False
+                        print(self.algorithm_selected)
+                        
+                    if (
+                        pos[0] > 635 and pos[0] < 635 + 250 and
+                        pos[1] > 580 - 4 * 40 and pos[1] < 580 + 40 - 4 * 40 and
+                        self.dropdown_expanded == True
+                    ):
+                        self.algorithm_selected = "BFS"
+                        self.dropdown_expanded = False
+                        print(self.algorithm_selected)
+                        
+                    if (
+                        pos[0] > 635 and pos[0] < 635 + 250 and
+                        pos[1] > 580 - 5 * 40 and pos[1] < 580 + 40 - 5 * 40 and
+                        self.dropdown_expanded == True
+                    ):
+                        self.algorithm_selected = "ACO"
+                        self.dropdown_expanded = False
+                        print(self.algorithm_selected)
                 # (self.w // 2 - 110, self.h // 2 + y_const - 130)
                 if self.menu_state:
                     if (
@@ -417,11 +542,11 @@ class Game(Board):
                     print(pos)
                     if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 260) and (
                         pos[1] > self.h // 2 + 85 - 200 and pos[1] < self.h // 2 + 85 - 200 + 60):
-                        random_sudoku = generate_random_sudoku("easy")
+                        self.random_sudoku = generate_random_sudoku("easy")
                         print("easy")
                         # solution, nodes_expand, time = ACO_solve(random_sudoku)
                         # show_sudoku(t)
-                        self.board = Board(9, 9, 600, 600, random_sudoku)
+                        self.board = Board(9, 9, 600, 600, self.random_sudoku)
                         self.empty = self.board.is_empty_game()
                         self.strikes = 0
                         self.start_state = False
@@ -429,11 +554,11 @@ class Game(Board):
                         self.playing = True
                     if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 260) and (
                         pos[1] > self.h // 2 + 85 * 2 - 200 and pos[1] < self.h // 2 + 2 * 85 - 200 + 60):
-                        random_sudoku = generate_random_sudoku("medium")
+                        self.random_sudoku = generate_random_sudoku("medium")
                         print("medium")
                         # t, _, _ = ACO_solve(random_sudoku)
                         # show_sudoku(t)
-                        self.board = Board(9, 9, 600, 600, random_sudoku)
+                        self.board = Board(9, 9, 600, 600, self.random_sudoku)
                         self.empty = self.board.is_empty_game()
                         self.strikes = 0
                         self.start_state = False
@@ -441,11 +566,11 @@ class Game(Board):
                         self.playing = True
                     if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 235) and (
                         pos[1] > self.h // 2 + 85 * 3 - 200 and pos[1] < self.h // 2 + 3 * 85 - 200 + 60):
-                        random_sudoku = generate_random_sudoku("hard")
+                        self.random_sudoku = generate_random_sudoku("hard")
                         print("hard")
                         # t, _, _ = ACO_solve(random_sudoku)
                         # show_sudoku(t)
-                        self.board = Board(9, 9, 600, 600, random_sudoku)
+                        self.board = Board(9, 9, 600, 600, self.random_sudoku)
                         self.empty = self.board.is_empty_game()
                         self.strikes = 0
                         self.start_state = False
@@ -453,11 +578,11 @@ class Game(Board):
                         self.playing = True
                     if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 310) and (
                         pos[1] > self.h // 2 + 85 * 4 - 200 and pos[1] < self.h // 2 + 4 * 85 - 200 + 60):
-                        random_sudoku = generate_random_sudoku("expert")
+                        self.random_sudoku = generate_random_sudoku("expert")
                         print("expert")
                         # t, _, _ = ACO_solve(random_sudoku)
                         # show_sudoku(t)
-                        self.board = Board(9, 9, 600, 600, random_sudoku)
+                        self.board = Board(9, 9, 600, 600, self.random_sudoku)
                         self.empty = self.board.is_empty_game()
                         self.strikes = 0
                         self.start_state = False
