@@ -2,9 +2,9 @@ import pygame
 
 screen = pygame.display.set_mode((900, 800))
 # left margin
-lm = 150
+lm = 20
 # top margin
-tm = 100
+tm = 20
 
 
 class Square:
@@ -44,7 +44,7 @@ class Square:
                 ),
             )
         elif self.value != 0 and self.base == False:
-            output = font.render(str(self.value), 1, (0, 0, 0))
+            output = font.render(str(self.value), 1, (50, 90, 200))
 
             scr.blit(
                 output,
@@ -54,7 +54,7 @@ class Square:
                 ),
             )
         if self.clicked:
-            pygame.draw.rect(screen, (255, 0, 0), (x, y, separation, separation), 4)
+            pygame.draw.rect(screen, (50, 90, 155), (x, y, separation, separation), 4)
 
     # Sets a value for the square
     def set_value(self, value):

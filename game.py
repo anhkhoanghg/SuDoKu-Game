@@ -1,11 +1,15 @@
 import os
 import pygame
 from sudoku import generate_random_sudoku, show_sudoku
+import tkinter as tk
+from tkinter import messagebox
 import time
 from board import Board
 from logic.AntColony import ACO_solve
-
-
+from logic.BFS_solver import BFS_solve
+from logic.DFS_solver import DFS_solve
+from logic.UCS_solver import UCS_solve
+from logic.Heuristic_solvers import a_star_solve
 
 
 class Game(Board):
@@ -16,7 +20,7 @@ class Game(Board):
 
     def __init__(self):
         pygame.init()
-        self.running, self.playing = True, False
+        self.running, self.playing, self.counting = True, False, True
         # Difficulty menu state
         self.difficulty_state = False
         # Start section state
@@ -41,6 +45,7 @@ class Game(Board):
     # Renders the window where the game takes place
     def redraw_window(self, time):
         lm = 10
+        pos = pygame.mouse.get_pos()
 
         self.window.fill(self.menu_bg_color)
         pygame.draw.circle(self.window, (0, 0, 0, 1), (self.w - 50, 50), 30)
@@ -54,15 +59,37 @@ class Game(Board):
         )
         fnt = pygame.font.SysFont("comicsans", 40)
         fnt2 = pygame.font.SysFont("comicsans", 40)
-        time = fnt.render("Time " + self.format_time(time), 1, (76, 175, 80, 1))
+        # Create counting time
+        time = pygame.font.SysFont("comicsans", 32).render("Time" + self.format_time(time), 1, (76, 175, 80, 1))
+        # Create solve button
+        solve_button = pygame.font.SysFont("comicsans", 40).render("Solve game by algorithm", 1, (0, 0, 0, 255))
+        button_width = solve_button.get_width() + 60
+        button_height = solve_button.get_height() + 20
+
+        solve_button_surface = pygame.Surface((button_width, button_height), pygame.SRCALPHA)
+        background_button_color = (255, 255, 255)
+        pygame.draw.rect(solve_button_surface, background_button_color, (0, 0, button_width, button_height), border_radius=10)
+
+        border_color = (0, 0, 0)
+        pygame.draw.rect(solve_button_surface, border_color, (0, 0, button_width, button_height), border_radius=10, width=2)
+        if (    
+            pos[0] > 200 and pos[0] < 200 + button_width and
+            pos[1] > 655 and pos[1] < 655 + button_height
+        ):
+            pygame.draw.rect(solve_button_surface, (76, 175, 80), (0, 0, button_width, button_height), border_radius=10)
+
+        # Create menu
         menu = fnt.render("M = Back to Menu", 1, (255, 255, 255, 1))
-        complete = fnt.render("Press C to complete the board", 1, (0, 0, 0, 1))
+        # complete = fnt.render("Press C to complete the board", 1, (0, 0, 0, 1))
         pygame.draw.circle(self.window, (0, 0, 0, 1), (110, 920), 80)
         pygame.draw.circle(self.window, (0, 0, 0, 1), (int(self.w // 1.11), 920), 80)
         pygame.draw.rect(self.window, (0, 0, 0, 1), pygame.Rect(100, 840, 880, 160))
-        self.window.blit(time, (105, 900))
+        # render into window
+        self.window.blit(solve_button_surface, (200, 655))
+        self.window.blit(solve_button, (230, 660))
+        self.window.blit(time, (635, 25))
         self.window.blit(menu, (self.w // 1.65, 900))
-        self.window.blit(complete, (160, 20))
+        # self.window.blit(complete, (160, 20))
         error = fnt2.render("X ", 2, (255, 0, 0))
         chance = fnt2.render("X ", 2, (76, 175, 80, 1))
         position = []
@@ -82,11 +109,11 @@ class Game(Board):
         pos = pygame.mouse.get_pos()
         y_const = 85
         self.window.fill(self.menu_bg_color)
-        fnt = pygame.font.SysFont("8-BIT-WONDER", 85)
-        fnt2 = pygame.font.SysFont("8-BIT-WONDER", 35)
-        fn3 = pygame.font.SysFont("8-BIT-WONDER", 105)
+        fnt = pygame.font.SysFont("8-BIT-WONDER", 55)
+        # fnt2 = pygame.font.SysFont("8-BIT-WONDER", 35)
+        # fn3 = pygame.font.SysFont("8-BIT-WONDER", 105)
         # Sudoku = fn3.render("Sudoku", 1, (255, 255, 255, 255))
-        MainMenu = fnt.render("Main Menu ", 1, (255, 255, 255, 255))
+        MainMenu = pygame.font.SysFont("8-BIT-WONDER", 75).render("Evil Sudoku", 1, (255, 255, 255, 255))
         Start = fnt.render("Start ", 1, (255, 255, 255, 255))
         Difficulty = fnt.render("Difficulty ", 1, (255, 255, 255, 255))
         Quit = fnt.render("Quit ", 1, (255, 255, 255, 255))
@@ -95,7 +122,7 @@ class Game(Board):
             pos[1] > self.h // 2 + 85 - 130 and pos[1] < self.h // 2 + 85 - 130 + 60
         ):
             Start = fnt.render("Start", 1, (76, 175, 80, 1))  # 266 59
-        if (pos[0] > self.w // 2 - 130 and pos[0] < self.w // 2 - 110 + 240) and (
+        if (pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 240) and (
             pos[1] > self.h // 2 + 2 * 85 - 130
             and pos[1] < self.h // 2 + 2 * 85 - 130 + 60
         ):
@@ -106,10 +133,10 @@ class Game(Board):
         ):
             Quit = fnt.render("Quit", 1, (76, 175, 80, 1))
         # self.window.blit(Sudoku, (self.w // 2 - 105, 40))
-        self.window.blit(MainMenu, (self.w // 2 - 130, 125))
+        self.window.blit(MainMenu, (self.w // 2 - 170, 125))
         self.window.blit(Start, (self.w // 2 - 70, self.h // 2 + y_const - 130))
         self.window.blit(
-            Difficulty, (self.w // 2 - 130, self.h // 2 + 2 * y_const - 130)
+            Difficulty, (self.w // 2 - 110, self.h // 2 + 2 * y_const - 130)
         )
         self.window.blit(Quit, (self.w // 2 - 67, self.h // 2 + 3 * y_const - 130))
 
@@ -118,9 +145,8 @@ class Game(Board):
         pos = pygame.mouse.get_pos()
         y_const = 85
         self.window.fill(self.menu_bg_color)
-        fnt = pygame.font.SysFont("8-BIT-WONDER", 85)
-        MainMenu = fnt.render("Main Menu ", 1, (255, 255, 255, 255))
-        Difficulty = fnt.render("Difficulty Menu ", 1, (255, 255, 255, 255))
+        fnt = pygame.font.SysFont("8-BIT-WONDER", 55)
+        Difficulty = pygame.font.SysFont("8-BIT-WONDER", 75).render("Choose number of chances ", 1, (255, 255, 255, 255))
         if self.chances == 10:
             ten_Chances = fnt.render("10 Chances ", 1, (76, 175, 80, 1))
         else:
@@ -133,6 +159,7 @@ class Game(Board):
             three_Chances = fnt.render("3 Chances ", 1, (76, 175, 80, 1))
         else:
             three_Chances = fnt.render("3 Chances ", 1, (255, 255, 255, 255))
+        MainMenu = fnt.render("Back ", 1, (255, 255, 255, 255))
 
         if (pos[0] > self.w // 2 - 120 and pos[0] < self.w // 2 - 110 + 320) and (
             pos[1] > self.h // 2 + 85 - 130 and pos[1] < self.h // 2 + 85 - 130 + 60
@@ -152,9 +179,9 @@ class Game(Board):
             pos[1] > self.h // 2 + 4 * 85 - 130
             and pos[1] < self.h // 2 + 4 * 85 - 130 + 60
         ):
-            MainMenu = fnt.render("Main Menu ", 1, (76, 175, 80, 1))
+            MainMenu = fnt.render("Back", 1, (76, 175, 80, 1))
 
-        self.window.blit(Difficulty, (self.w // 2 - 180, 125))
+        self.window.blit(Difficulty, (self.w // 2 - 350, 125))
         self.window.blit(ten_Chances, (self.w // 2 - 120, self.h // 2 + y_const - 130))
         self.window.blit(
             six_Chances, (self.w // 2 - 110, self.h // 2 + 2 * y_const - 130)
@@ -169,38 +196,49 @@ class Game(Board):
         pos = pygame.mouse.get_pos()
         y_const = 85
         self.window.fill(self.menu_bg_color)
-        fnt = pygame.font.SysFont("8-BIT-WONDER", 85)
-        Select = fnt.render("Select A Map ", 1, (255, 255, 255, 255))  # 378, 60
-        map1 = fnt.render("Sudoku 1 ", 1, (255, 255, 255, 255))  # 266 59
-        map2 = fnt.render("Sudoku 2 ", 1, (255, 255, 255, 255))  # 266 59
-        random = fnt.render("Random ", 1, (255, 255, 255, 255))  # 235 59
-        MainMenu = fnt.render("Main Menu", 1, (255, 255, 255, 255))
+        fnt = pygame.font.SysFont("8-BIT-WONDER", 55)
+        Select = pygame.font.SysFont("8-BIT-WONDER", 75).render("Select difficulty ", 1, (255, 255, 255, 255))  # 378, 60
+        # map1 = fnt.render("Sudoku 1 ", 1, (255, 255, 255, 255))  # 266 59
+        # map2 = fnt.render("Sudoku 2 ", 1, (255, 255, 255, 255))  # 266 59
+        # random = fnt.render("Random ", 1, (255, 255, 255, 255))  # 235 59
+        
+        easyLevel = fnt.render("Easy", 1, (255, 255, 255, 255))  # 266 59
+        mediumLevel = fnt.render("Medium", 1, (255, 255, 255, 255))  # 266 59
+        hardLevel = fnt.render("Hard", 1, (255, 255, 255, 255))  # 235 59
+        expertLevel = fnt.render("Expert", 1, (255, 255, 255, 255))  # 235 59
+        MainMenu = fnt.render("Back", 1, (255, 255, 255, 255))
 
         if (pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 260) and (
-            pos[1] > self.h // 2 + 85 - 130 and pos[1] < self.h // 2 + 85 - 130 + 60
+            pos[1] > self.h // 2 + 85 - 200 and pos[1] < self.h // 2 + 85 - 200 + 60
         ):
-            map1 = fnt.render("Sudoku 1 ", 1, (76, 175, 80, 1))  # 266 59
+            easyLevel = fnt.render("Easy", 1, (76, 175, 80, 1))  # 266 59
             # 76, 175, 80, 1)
         if (pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 260) and (
-            pos[1] > self.h // 2 + 85 * 2 - 130
-            and pos[1] < self.h // 2 + 2 * 85 - 130 + 60
+            pos[1] > self.h // 2 + 85 * 2 - 200
+            and pos[1] < self.h // 2 + 2 * 85 - 200 + 60
         ):
-            map2 = fnt.render("Sudoku 2 ", 1, (76, 175, 80, 1))
+            mediumLevel = fnt.render("Medium", 1, (76, 175, 80, 1))
         if (pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 235) and (
-            pos[1] > self.h // 2 + 85 * 3 - 130
-            and pos[1] < self.h // 2 + 3 * 85 - 130 + 60
+            pos[1] > self.h // 2 + 85 * 3 - 200
+            and pos[1] < self.h // 2 + 3 * 85 - 200 + 60
         ):
-            random = fnt.render("Random", 1, (76, 175, 80, 1))
+            hardLevel = fnt.render("Hard", 1, (76, 175, 80, 1))
         if (pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 310) and (
-            pos[1] > self.h // 2 + 85 * 4 - 130
-            and pos[1] < self.h // 2 + 4 * 85 - 130 + 60
+            pos[1] > self.h // 2 + 85 * 4 - 200
+            and pos[1] < self.h // 2 + 4 * 85 - 200 + 60
         ):
-            MainMenu = fnt.render("Main Menu", 1, (76, 175, 80, 1))
-        self.window.blit(Select, (self.w // 2 - 150, 125))
-        self.window.blit(map1, (self.w // 2 - 110, self.h // 2 + y_const - 130))
-        self.window.blit(map2, (self.w // 2 - 110, self.h // 2 + 2 * y_const - 130))
-        self.window.blit(random, (self.w // 2 - 110, self.h // 2 + 3 * y_const - 130))
-        self.window.blit(MainMenu, (self.w // 2 - 110, self.h // 2 + 4 * y_const - 130))
+            expertLevel = fnt.render("Expert", 1, (76, 175, 80, 1))
+        if (pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 310) and (
+            pos[1] > self.h // 2 + 85 * 5 - 200
+            and pos[1] < self.h // 2 + 5 * 85 - 200 + 60
+        ):
+            MainMenu = fnt.render("Back", 1, (76, 175, 80, 1))
+        self.window.blit(Select, (self.w // 2 - 200, 125))
+        self.window.blit(easyLevel, (self.w // 2 - 70, self.h // 2 + y_const - 200))
+        self.window.blit(mediumLevel, (self.w // 2 - 70, self.h // 2 + 2 * y_const - 200))
+        self.window.blit(hardLevel, (self.w // 2 - 70, self.h // 2 + 3 * y_const - 200))
+        self.window.blit(expertLevel, (self.w // 2 - 70, self.h // 2 + 4 * y_const - 200))
+        self.window.blit(MainMenu, (self.w // 2 - 70, self.h // 2 + 5 * y_const - 200))
 
     # Stops all loops
     def close_game(self):
@@ -213,12 +251,15 @@ class Game(Board):
     # Displays time spent in a game
     def format_time(self, secs):
         sec = secs % 60
+        
         minute = secs // 60
-        time = " " + str(minute) + ":" + str(sec)
+        time = " " + str(minute) + ":" + (str(sec) if (sec >= 10) else "0" + str(sec))
         return time
 
     # Manages all user inputs/ events for the playing mode
     def main_event_handler(self):
+        root = tk.Tk()
+        root.withdraw()  # Hide the main window
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 self.close_game()
@@ -263,7 +304,22 @@ class Game(Board):
                             self.board.complete_GUI(self.empty)
                             if self.empty:
                                 self.empty.pop(0)
+                                
+                        if self.board.victory_state():
+                            pygame.display.update()
+                            print("Game over")
+                            result = messagebox.askokcancel("Game over", "You win the game. Back to menu?")
+                            if result:
+                                print("Back to menu")
+                                self.counting = False
+                                self.playing = False
+                                self.menu_state = True
+                                self.strikes = 0
+                            else:
+                                self.counting = False
+                                print("Review the game")
 
+                            
                 if e.key == pygame.K_RETURN:
                     # Enter while playing handler
                     if self.playing == True:
@@ -276,9 +332,19 @@ class Game(Board):
                                 self.strikes += 1
                             self.key = None
                             if self.board.victory_state():
+                                pygame.display.update()
                                 print("Game over")
-                                self.playing = False
-                        # Go into the start menu
+                                result = messagebox.askokcancel("Game over", "You win the game. Back to menu?")
+                                if result:
+                                    print("Back to menu")
+                                    self.counting = False
+                                    self.playing = False
+                                    self.menu_state = True
+                                    self.strikes = 0
+                                else:
+                                    self.counting = False
+                                    print("Review the game")
+                                # Go into the start menu
 
                         self.transition = False
             if e.type == pygame.MOUSEBUTTONDOWN:
@@ -349,70 +415,56 @@ class Game(Board):
                         self.menu_state = True
                 if self.start_state:
                     print(pos)
-                    if (
-                        pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 260
-                    ) and (
-                        pos[1] > self.h // 2 + 85 - 130
-                        and pos[1] < self.h // 2 + 85 - 130 + 60
-                    ):
-                        m1 = [
-                            [7, 8, 0, 4, 0, 0, 1, 2, 0],
-                            [6, 0, 0, 0, 7, 5, 0, 0, 9],
-                            [0, 0, 0, 6, 0, 1, 0, 7, 8],
-                            [0, 0, 7, 0, 4, 0, 2, 6, 0],
-                            [0, 0, 1, 0, 5, 0, 9, 3, 0],
-                            [9, 0, 4, 0, 6, 0, 0, 0, 5],
-                            [0, 7, 0, 3, 0, 0, 0, 1, 2],
-                            [1, 2, 0, 0, 0, 7, 4, 0, 0],
-                            [0, 4, 9, 2, 0, 6, 0, 0, 7],
-                        ]
-
-                        self.board = Board(9, 9, 600, 600, m1)
+                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 260) and (
+                        pos[1] > self.h // 2 + 85 - 200 and pos[1] < self.h // 2 + 85 - 200 + 60):
+                        random_sudoku = generate_random_sudoku("easy")
+                        print("easy")
+                        # solution, nodes_expand, time = ACO_solve(random_sudoku)
+                        # show_sudoku(t)
+                        self.board = Board(9, 9, 600, 600, random_sudoku)
                         self.empty = self.board.is_empty_game()
+                        self.strikes = 0
                         self.start_state = False
+                        self.counting = True
                         self.playing = True
-                    if (
-                        pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 260
-                    ) and (
-                        pos[1] > self.h // 2 + 85 * 2 - 130
-                        and pos[1] < self.h // 2 + 2 * 85 - 130 + 60
-                    ):
-                        m2 = [
-                            [8, 1, 0, 0, 3, 0, 0, 2, 7],
-                            [0, 6, 2, 0, 5, 0, 0, 9, 0],
-                            [0, 7, 0, 0, 0, 0, 0, 0, 0],
-                            [0, 9, 0, 6, 0, 0, 1, 0, 0],
-                            [1, 0, 0, 0, 2, 0, 0, 0, 4],
-                            [0, 0, 8, 0, 0, 5, 0, 7, 0],
-                            [0, 0, 0, 0, 0, 0, 0, 8, 0],
-                            [0, 2, 0, 0, 1, 0, 7, 5, 0],
-                            [3, 8, 0, 0, 7, 0, 0, 4, 2],
-                        ]
-
-                        self.board = Board(9, 9, 600, 600, m2)
-                        self.empty = self.board.is_empty_game()
-                        self.start_state = False
-                        self.playing = True
-
-                    if (
-                        pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 235
-                    ) and (
-                        pos[1] > self.h // 2 + 85 * 3 - 130
-                        and pos[1] < self.h // 2 + 3 * 85 - 130 + 60
-                    ):
-                        random_sudoku = generate_random_sudoku("expert")
+                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 260) and (
+                        pos[1] > self.h // 2 + 85 * 2 - 200 and pos[1] < self.h // 2 + 2 * 85 - 200 + 60):
+                        random_sudoku = generate_random_sudoku("medium")
+                        print("medium")
                         # t, _, _ = ACO_solve(random_sudoku)
                         # show_sudoku(t)
                         self.board = Board(9, 9, 600, 600, random_sudoku)
                         self.empty = self.board.is_empty_game()
+                        self.strikes = 0
                         self.start_state = False
+                        self.counting = True
                         self.playing = True
-                    if (
-                        pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 310
-                    ) and (
-                        pos[1] > self.h // 2 + 85 * 4 - 130
-                        and pos[1] < self.h // 2 + 4 * 85 - 130 + 60
-                    ):
+                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 235) and (
+                        pos[1] > self.h // 2 + 85 * 3 - 200 and pos[1] < self.h // 2 + 3 * 85 - 200 + 60):
+                        random_sudoku = generate_random_sudoku("hard")
+                        print("hard")
+                        # t, _, _ = ACO_solve(random_sudoku)
+                        # show_sudoku(t)
+                        self.board = Board(9, 9, 600, 600, random_sudoku)
+                        self.empty = self.board.is_empty_game()
+                        self.strikes = 0
+                        self.start_state = False
+                        self.counting = True
+                        self.playing = True
+                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 310) and (
+                        pos[1] > self.h // 2 + 85 * 4 - 200 and pos[1] < self.h // 2 + 4 * 85 - 200 + 60):
+                        random_sudoku = generate_random_sudoku("expert")
+                        print("expert")
+                        # t, _, _ = ACO_solve(random_sudoku)
+                        # show_sudoku(t)
+                        self.board = Board(9, 9, 600, 600, random_sudoku)
+                        self.empty = self.board.is_empty_game()
+                        self.strikes = 0
+                        self.start_state = False
+                        self.counting = True
+                        self.playing = True
+                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 310) and (
+                        pos[1] > self.h // 2 + 85 * 5 - 200 and pos[1] < self.h // 2 + 5 * 85 - 200 + 60):
                         self.start_state = False
                         self.menu_state = True
 
@@ -427,11 +479,14 @@ class Game(Board):
                 start = time.time()
                 # Playing state loop
                 while self.playing:
-                    play_time = round(time.time() - start)
+        
+                    if self.counting:
+                        play_time = round(time.time() - start)
+                    
                     self.main_event_handler()
                     if self.board.clicked and self.key != None:
                         self.board.temp(self.key)
-                    if self.chances == self.strikes:
+                    if self.chances <= self.strikes:
                         self.playing = False
                         self.menu_state = True
                         self.strikes = 0
