@@ -43,6 +43,7 @@ class AntSolver:
         elapsed_time = time.time() - self.start_time
         print(f"Explored Nodes: {self.explored_nodes}")
         print(f"Time Taken: {elapsed_time:.4f} seconds")
+        return self.explored_nodes
 
     def print_pher_matrix(self):
         print("Pheromone matrix:")
@@ -102,7 +103,7 @@ class AntSolver:
                     self.solution.print()
                     print(self.solution.fixed_cell_cnt, "fixed cells")
                     self.print_pher_matrix()
-                    self.print_statistics()
+                    # self.print_statistics()
                     return self.solution
 
                 # New best
@@ -127,7 +128,7 @@ class AntSolver:
 
             cycle += 1
 
-        return self.solution, cycle
+        return self.solution
 
 def ACO_solve(board):
     print("\nSolving with ACO...")
@@ -146,6 +147,7 @@ def ACO_solve(board):
         return False
     solver = AntSolver(grid=gr, global_pher_update=GLOBAL_PHER_UPDATE, best_pher_evaporation=BEST_PHER_EVAPORATION, num_of_ants=NUM_OF_ANTS)
     s = solver.solve(LOCAL_PHER_UPDATE, GREEDINESS)
+    explored_nodes = solver.print_statistics()
     elapsed_time = time.time() - start_time
     if s:
         solution = s.turn_2d_array()
@@ -153,6 +155,6 @@ def ACO_solve(board):
             solution = to_letters(solution)
         else:
             pass
-    return solution, elapsed_time
+    return solution,explored_nodes ,elapsed_time
 
 

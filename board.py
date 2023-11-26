@@ -1,7 +1,7 @@
 import pygame
 from sudoku import (
     complete_sudoku,
-    is_valid,
+    is_valid_board as is_valid,
     generate_random_sudoku,
     show_sudoku,
     is_empty,
@@ -83,7 +83,7 @@ class Board(Square):
                 self.squares[row][column].set_value(0)
                 self.squares[row][column].set_temp_value(0)
                 self.update_board()
-                print(show_sudoku(self.board))
+                # print(show_sudoku(self.board))
                 return False
 
     def is_empty_game(self):
@@ -115,7 +115,7 @@ class Board(Square):
 
     def complete_GUI(self, empty):
         while empty:
-            print(empty)
+            # print(empty)
             y, x = empty[0]
             for i in range(1, 10):
                 self.board[y][x] = i
@@ -192,3 +192,4 @@ class Board(Square):
         row, column = self.clicked
         if self.squares[row][column].value == 0:
             self.squares[row][column].set_temp_value(0)
+

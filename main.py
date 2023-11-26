@@ -5,9 +5,13 @@ from logic.Grid import Grid
 from logic.letters_transform import *
 from logic.AntColony import AntSolver
 from logic.AntColony import ACO_solve
+from logic.BFS_solver import BFS_solve
+from logic.DFS_solver import DFS_solve
+from logic.UCS_solver import UCS_solve
 from logic.Heuristic_solvers import a_star_solve
-from sudoku import show_sudoku
-from logic.HillClimbing import hl_solve
+from sudoku import show_sudoku, generate_random_sudoku
+
+
 
 # board = [[7, 8, 5, 4, 3, 9, 1, 2, 6],
 #         [6, 1, 2, 8, 7, 5, 3, 4, 9],
@@ -56,8 +60,10 @@ grid = [['C','.','G','.','.','.','.','A','.'],
 #     print("Perfect")
 # else:
 #     print("ACO not good")
-
-s = hl_solve(board=grid)
+p = generate_random_sudoku("hard")
+# s, nodee, timee = BFS_solve(board=p)
+s, nodee, timee = DFS_solve(board=p)
+# show_sudoku(s)
 print("ssss")
 
 

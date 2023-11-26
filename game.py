@@ -1,8 +1,11 @@
 import os
 import pygame
-from sudoku import generate_random_sudoku
+from sudoku import generate_random_sudoku, show_sudoku
 import time
 from board import Board
+from logic.AntColony import ACO_solve
+
+
 
 
 class Game(Board):
@@ -397,7 +400,10 @@ class Game(Board):
                         pos[1] > self.h // 2 + 85 * 3 - 130
                         and pos[1] < self.h // 2 + 3 * 85 - 130 + 60
                     ):
-                        self.board = Board(9, 9, 600, 600, generate_random_sudoku())
+                        random_sudoku = generate_random_sudoku("expert")
+                        # t, _, _ = ACO_solve(random_sudoku)
+                        # show_sudoku(t)
+                        self.board = Board(9, 9, 600, 600, random_sudoku)
                         self.empty = self.board.is_empty_game()
                         self.start_state = False
                         self.playing = True

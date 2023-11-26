@@ -1,5 +1,6 @@
 import random
 
+
 current_sudoku = []
 
 sudokus = [[[7, 8, 0, 4, 0, 0, 1, 2, 0],
@@ -89,7 +90,7 @@ def complete_sudoku(game_board):
 
 
 # generates a random sudoku
-def generate_random_sudoku():
+def generate_random_sudoku(level):
     #Empty board
     rand_sudoku = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -105,35 +106,44 @@ def generate_random_sudoku():
     values_list = []
     filled_box = 0
     empty_box = 0
-    while filled_box < 55:
-        for a in values_list:
-            rand_sudoku[a[0]][a[1]] = 0
-        rand_sudoku[0][0] = random.randint(1, 9)
-        r1 = random.randint(0, 8)
-        r2 = random.randint(0, 8)
-        v = random.randint(1, 9)
-        filled_box += 1
-        rand_sudoku[r1][r2] = v
-        values_list.append((r1, r2))
-        #Backtracking
-        if is_valid_board(rand_sudoku, rand_sudoku[r1][r2], (r1, r2)) == False:
+    lv = {
+        "easy": [43, 49],
+        "medium": [50, 55],
+        "hard": [56, 59],
+        "expert": [60, 64]
+    }
+
+    value = lv.get(level.lower())
+    if value is not None:
+        while filled_box < 55:
+            for a in values_list:
+                rand_sudoku[a[0]][a[1]] = 0
+            rand_sudoku[0][0] = random.randint(1, 9)
+            r1 = random.randint(0, 8)
+            r2 = random.randint(0, 8)
+            v = random.randint(1, 9)
+            filled_box += 1
+            rand_sudoku[r1][r2] = v
+            values_list.append((r1, r2))
+            #Backtracking
+            if is_valid_board(rand_sudoku, rand_sudoku[r1][r2], (r1, r2)) == False:
+                rand_sudoku[r1][r2] = 0
+                values_list.remove((r1, r2))
+                filled_box -= 1
+        if complete_sudoku(rand_sudoku) != True:
+            for a in values_list:
+                rand_sudoku[a[0]][a[1]] = 0
+            return generate_random_sudoku()
+        #Sets a random amount of filled squares
+        rand = random.randint(value[0], value[1])
+        while empty_box < rand:
+            r1 = random.randint(0, 8)
+            r2 = random.randint(0, 8)
+            if rand_sudoku[r1][r2] == 0:
+                empty_box -= 1
             rand_sudoku[r1][r2] = 0
-            values_list.remove((r1, r2))
-            filled_box -= 1
-    if complete_sudoku(rand_sudoku) != True:
-        for a in values_list:
-            rand_sudoku[a[0]][a[1]] = 0
-        return generate_random_sudoku()
-    #Sets a random amount of filled squares
-    rand = random.randint(42, 50)
-    while empty_box < rand:
-        r1 = random.randint(0, 8)
-        r2 = random.randint(0, 8)
-        if rand_sudoku[r1][r2] == 0:
-            empty_box -= 1
-        rand_sudoku[r1][r2] = 0
-        empty_box += 1
-    show_sudoku(rand_sudoku)
+            empty_box += 1
+        show_sudoku(rand_sudoku)
     return rand_sudoku
 
 # print('incomplete sudoku\n')
@@ -142,7 +152,8 @@ def generate_random_sudoku():
 # complete_sudoku(sudokus[0])
 # show_sudoku(sudokus[0])
 # print('\nrandomly generated sudoku\n')
-# s = generate_random_sudoku()
+# s = generate_random_sudoku("medium")
 # print('\ncompleted randomly generated sudoku\n')
 # complete_sudoku(s)
 # show_sudoku(s)
+
