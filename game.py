@@ -68,43 +68,85 @@ class Game(Board):
         fnt = pygame.font.SysFont("comicsans", 40)
         fnt2 = pygame.font.SysFont("comicsans", 40)
         # Create counting time
-        time = pygame.font.SysFont("comicsans", 32).render("Time" + self.format_time(time), 1, (76, 175, 80, 1))
+        time = pygame.font.SysFont("comicsans", 32).render(
+            "Time" + self.format_time(time), 1, (76, 175, 80, 1)
+        )
         # Create solve button
-        solve_button = pygame.font.SysFont("comicsans", 40).render("Solve game by algorithm", 1, (0, 0, 0, 255))
+        solve_button = pygame.font.SysFont("comicsans", 40).render(
+            "Solve game by algorithm", 1, (0, 0, 0, 255)
+        )
         button_width = solve_button.get_width() + 60
         button_height = solve_button.get_height() + 20
 
-        solve_button_surface = pygame.Surface((button_width, button_height), pygame.SRCALPHA)
+        solve_button_surface = pygame.Surface(
+            (button_width, button_height), pygame.SRCALPHA
+        )
         background_button_color = (255, 255, 255)
-        pygame.draw.rect(solve_button_surface, background_button_color, (0, 0, button_width, button_height), border_radius=10)
+        pygame.draw.rect(
+            solve_button_surface,
+            background_button_color,
+            (0, 0, button_width, button_height),
+            border_radius=10,
+        )
 
         border_color = (0, 0, 0)
-        pygame.draw.rect(solve_button_surface, border_color, (0, 0, button_width, button_height), border_radius=10, width=2)
-        if (    
-            pos[0] > 200 and pos[0] < 200 + button_width and
-            pos[1] > 655 and pos[1] < 655 + button_height
+        pygame.draw.rect(
+            solve_button_surface,
+            border_color,
+            (0, 0, button_width, button_height),
+            border_radius=10,
+            width=2,
+        )
+        if (
+            pos[0] > 200
+            and pos[0] < 200 + button_width
+            and pos[1] > 655
+            and pos[1] < 655 + button_height
         ):
-            pygame.draw.rect(solve_button_surface, (76, 175, 80), (0, 0, button_width, button_height), border_radius=10)
+            pygame.draw.rect(
+                solve_button_surface,
+                (76, 175, 80),
+                (0, 0, button_width, button_height),
+                border_radius=10,
+            )
 
         # Create menu
         menu = fnt.render("M = Back to Menu", 1, (255, 255, 255, 1))
-        
+
         # Create dropdown
-        selected_button = pygame.font.SysFont("comicsans", 20).render((self.algorithm_selected + " Algorithm") if self.algorithm_selected else "Select algorithm", True, (0,0,0))
-        
-        pygame.draw.rect(self.window, (200, 200, 200) if self.dropdown_expanded else (255, 255, 255), pygame.Rect(635, 580, 250, 40))
+        selected_button = pygame.font.SysFont("comicsans", 20).render(
+            (self.algorithm_selected + " Algorithm")
+            if self.algorithm_selected
+            else "Select algorithm",
+            True,
+            (0, 0, 0),
+        )
+
+        pygame.draw.rect(
+            self.window,
+            (200, 200, 200) if self.dropdown_expanded else (255, 255, 255),
+            pygame.Rect(635, 580, 250, 40),
+        )
         pygame.draw.rect(self.window, (0, 0, 0), pygame.Rect(635, 580, 250, 40), 2)
         # complete = fnt.render("Press C to complete the board", 1, (0, 0, 0, 1))
         pygame.draw.circle(self.window, (0, 0, 0, 1), (110, 920), 80)
         pygame.draw.circle(self.window, (0, 0, 0, 1), (int(self.w // 1.11), 920), 80)
         pygame.draw.rect(self.window, (0, 0, 0, 1), pygame.Rect(100, 840, 880, 160))
-        
+
         # Result algorithm
-        explored_nodes_result = pygame.font.SysFont("comicsans", 20).render("Explored nodes: ", True, (0,0,0))
-        time_taken_result = pygame.font.SysFont("comicsans", 20).render("Elapsed time: ", True, (0,0,0))
-        
-        explored_nodes_text = pygame.font.SysFont("comicsans", 20).render(str(self.explored_nodes), True, (0,0,0))
-        elapsed_time_text = pygame.font.SysFont("comicsans", 20).render(str(self.elapsed_time), True, (0,0,0))
+        explored_nodes_result = pygame.font.SysFont("comicsans", 20).render(
+            "Explored nodes: ", True, (0, 0, 0)
+        )
+        time_taken_result = pygame.font.SysFont("comicsans", 20).render(
+            "Elapsed time: ", True, (0, 0, 0)
+        )
+
+        explored_nodes_text = pygame.font.SysFont("comicsans", 20).render(
+            str(self.explored_nodes), True, (0, 0, 0)
+        )
+        elapsed_time_text = pygame.font.SysFont("comicsans", 20).render(
+            str(self.elapsed_time), True, (0, 0, 0)
+        )
         # render into window
         # Draw selected option
         self.window.blit(explored_nodes_text, (640, 125))
@@ -121,16 +163,32 @@ class Game(Board):
         chance = fnt2.render("X ", 2, (76, 175, 80, 1))
         position = []
         position2 = []
-        
+
         # Draw dropdown options if expanded
         if self.dropdown_expanded:
             for i, option in enumerate(self.dropdown_options):
-                option_rect = pygame.Rect(pygame.Rect(635, 580, 250, 40).x, pygame.Rect(635, 580, 250, 40).y - (len(self.dropdown_options) - i) * 40, pygame.Rect(635, 580, 250, 40).width, 40)
+                option_rect = pygame.Rect(
+                    pygame.Rect(635, 580, 250, 40).x,
+                    pygame.Rect(635, 580, 250, 40).y
+                    - (len(self.dropdown_options) - i) * 40,
+                    pygame.Rect(635, 580, 250, 40).width,
+                    40,
+                )
                 pygame.draw.rect(self.window, (200, 200, 200), option_rect)
                 pygame.draw.rect(self.window, (0, 0, 0), option_rect, 2)
-                option_text = pygame.font.SysFont("comicsans", 20).render(option, True, (0, 0, 0))
-                self.window.blit(option_text, (pygame.Rect(635, 580, 250, 40).x + 5, pygame.Rect(635, 580, 250, 40).y - (len(self.dropdown_options) - i) * 40 + 5))
-        
+                option_text = pygame.font.SysFont("comicsans", 20).render(
+                    option, True, (0, 0, 0)
+                )
+                self.window.blit(
+                    option_text,
+                    (
+                        pygame.Rect(635, 580, 250, 40).x + 5,
+                        pygame.Rect(635, 580, 250, 40).y
+                        - (len(self.dropdown_options) - i) * 40
+                        + 5,
+                    ),
+                )
+
         # Updates the chances and strikes
         for i in range(self.chances):
             position2.append((self.w - 65, 10 + (i * 50) + lm))
@@ -150,40 +208,44 @@ class Game(Board):
         # fnt2 = pygame.font.SysFont("8-BIT-WONDER", 35)
         # fn3 = pygame.font.SysFont("8-BIT-WONDER", 105)
         # Sudoku = fn3.render("Sudoku", 1, (255, 255, 255, 255))
-        MainMenu = pygame.font.SysFont("8-BIT-WONDER", 75).render("Evil Sudoku", 1, (255, 255, 255, 255))
-        Start = fnt.render("Start ", 1, (255, 255, 255, 255))
-        Difficulty = fnt.render("Difficulty ", 1, (255, 255, 255, 255))
-        Quit = fnt.render("Quit ", 1, (255, 255, 255, 255))
+        MainMenu = pygame.font.SysFont("8-BIT-WONDER", 75).render(
+            "Evil Sudoku", 1, (255, 255, 255, 255)
+        )
+        Start = fnt.render("  Start ", 1, (255, 255, 255, 255))
+        Life_chances = fnt.render("Life chances", 1, (255, 255, 255, 255))
+        Quit = fnt.render("  Quit ", 1, (255, 255, 255, 255))
 
         if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 110 + 195) and (
             pos[1] > self.h // 2 + 85 - 130 and pos[1] < self.h // 2 + 85 - 130 + 60
         ):
-            Start = fnt.render("Start", 1, (76, 175, 80, 1))  # 266 59
+            Start = fnt.render("  Start", 1, (76, 175, 80, 1))  # 266 59
         if (pos[0] > self.w // 2 - 110 and pos[0] < self.w // 2 - 110 + 240) and (
             pos[1] > self.h // 2 + 2 * 85 - 130
             and pos[1] < self.h // 2 + 2 * 85 - 130 + 60
         ):
-            Difficulty = fnt.render("Difficulty", 1, (76, 175, 80, 1))
+            Life_chances = fnt.render("Life chances", 1, (76, 175, 80, 1))
         if (pos[0] > self.w // 2 - 67 and pos[0] < self.w // 2 - 110 + 165) and (
             pos[1] > self.h // 2 + 3 * 85 - 130
             and pos[1] < self.h // 2 + 3 * 85 - 130 + 60
         ):
-            Quit = fnt.render("Quit", 1, (76, 175, 80, 1))
+            Quit = fnt.render("  Quit", 1, (76, 175, 80, 1))
         # self.window.blit(Sudoku, (self.w // 2 - 105, 40))
         self.window.blit(MainMenu, (self.w // 2 - 170, 125))
         self.window.blit(Start, (self.w // 2 - 70, self.h // 2 + y_const - 130))
         self.window.blit(
-            Difficulty, (self.w // 2 - 110, self.h // 2 + 2 * y_const - 130)
+            Life_chances, (self.w // 2 - 110, self.h // 2 + 2 * y_const - 130)
         )
         self.window.blit(Quit, (self.w // 2 - 67, self.h // 2 + 3 * y_const - 130))
 
     # renders difficulty menu
-    def render_difficulty(self):
+    def render_life_chances(self):
         pos = pygame.mouse.get_pos()
         y_const = 85
         self.window.fill(self.menu_bg_color)
         fnt = pygame.font.SysFont("8-BIT-WONDER", 55)
-        Difficulty = pygame.font.SysFont("8-BIT-WONDER", 75).render("Choose number of chances ", 1, (255, 255, 255, 255))
+        Life_chances = pygame.font.SysFont("8-BIT-WONDER", 75).render(
+            "Choose number of chances ", 1, (255, 255, 255, 255)
+        )
         if self.chances == 10:
             ten_Chances = fnt.render("10 Chances ", 1, (76, 175, 80, 1))
         else:
@@ -218,7 +280,7 @@ class Game(Board):
         ):
             MainMenu = fnt.render("Back", 1, (76, 175, 80, 1))
 
-        self.window.blit(Difficulty, (self.w // 2 - 350, 125))
+        self.window.blit(Life_chances, (self.w // 2 - 350, 125))
         self.window.blit(ten_Chances, (self.w // 2 - 120, self.h // 2 + y_const - 130))
         self.window.blit(
             six_Chances, (self.w // 2 - 110, self.h // 2 + 2 * y_const - 130)
@@ -234,11 +296,13 @@ class Game(Board):
         y_const = 85
         self.window.fill(self.menu_bg_color)
         fnt = pygame.font.SysFont("8-BIT-WONDER", 55)
-        Select = pygame.font.SysFont("8-BIT-WONDER", 75).render("Select difficulty ", 1, (255, 255, 255, 255))  # 378, 60
+        Select = pygame.font.SysFont("8-BIT-WONDER", 75).render(
+            "Select difficulty ", 1, (255, 255, 255, 255)
+        )  # 378, 60
         # map1 = fnt.render("Sudoku 1 ", 1, (255, 255, 255, 255))  # 266 59
         # map2 = fnt.render("Sudoku 2 ", 1, (255, 255, 255, 255))  # 266 59
         # random = fnt.render("Random ", 1, (255, 255, 255, 255))  # 235 59
-        
+
         easyLevel = fnt.render("Easy", 1, (255, 255, 255, 255))  # 266 59
         mediumLevel = fnt.render("Medium", 1, (255, 255, 255, 255))  # 266 59
         hardLevel = fnt.render("Hard", 1, (255, 255, 255, 255))  # 235 59
@@ -272,9 +336,13 @@ class Game(Board):
             MainMenu = fnt.render("Back", 1, (76, 175, 80, 1))
         self.window.blit(Select, (self.w // 2 - 200, 125))
         self.window.blit(easyLevel, (self.w // 2 - 70, self.h // 2 + y_const - 200))
-        self.window.blit(mediumLevel, (self.w // 2 - 70, self.h // 2 + 2 * y_const - 200))
+        self.window.blit(
+            mediumLevel, (self.w // 2 - 70, self.h // 2 + 2 * y_const - 200)
+        )
         self.window.blit(hardLevel, (self.w // 2 - 70, self.h // 2 + 3 * y_const - 200))
-        self.window.blit(expertLevel, (self.w // 2 - 70, self.h // 2 + 4 * y_const - 200))
+        self.window.blit(
+            expertLevel, (self.w // 2 - 70, self.h // 2 + 4 * y_const - 200)
+        )
         self.window.blit(MainMenu, (self.w // 2 - 70, self.h // 2 + 5 * y_const - 200))
 
     # Stops all loops
@@ -288,16 +356,16 @@ class Game(Board):
     # Displays time spent in a game
     def format_time(self, secs):
         sec = secs % 60
-        
+
         minute = secs // 60
         time = " " + str(minute) + ":" + (str(sec) if (sec >= 10) else "0" + str(sec))
         return time
-    
+
     def render_statistics_results(self, nodes, time):
         self.explored_nodes = nodes
         self.elapsed_time = round(time, 4)
         pygame.display.update()
-        
+
     # Manages all user inputs/ events for the playing mode
     def main_event_handler(self):
         root = tk.Tk()
@@ -343,11 +411,13 @@ class Game(Board):
                             self.board.complete_GUI(self.empty)
                             if self.empty:
                                 self.empty.pop(0)
-                                
+
                         if self.board.victory_state():
                             pygame.display.update()
                             print("Game over")
-                            result = messagebox.askokcancel("Game over", "You win the game. Back to menu?")
+                            result = messagebox.askokcancel(
+                                "Game over", "You win the game. Back to menu?"
+                            )
                             if result:
                                 print("Back to menu")
                                 self.counting = False
@@ -358,7 +428,6 @@ class Game(Board):
                                 self.counting = False
                                 print("Review the game")
 
-                            
                 if e.key == pygame.K_RETURN:
                     # Enter while playing handler
                     if self.playing == True:
@@ -373,7 +442,9 @@ class Game(Board):
                             if self.board.victory_state():
                                 pygame.display.update()
                                 print("Game over")
-                                result = messagebox.askokcancel("Game over", "You win the game. Back to menu?")
+                                result = messagebox.askokcancel(
+                                    "Game over", "You win the game. Back to menu?"
+                                )
                                 if result:
                                     print("Back to menu")
                                     self.counting = False
@@ -393,88 +464,106 @@ class Game(Board):
                     if clicked:
                         self.board.clicked_handler(clicked[0], clicked[1])
                         self.key = None
-                        
+
                     # Solve button clicked
-                    solve_button = pygame.font.SysFont("comicsans", 40).render("Solve game by algorithm", 1, (0, 0, 0, 255))
+                    solve_button = pygame.font.SysFont("comicsans", 40).render(
+                        "Solve game by algorithm", 1, (0, 0, 0, 255)
+                    )
                     button_width = solve_button.get_width() + 60
                     button_height = solve_button.get_height() + 20
                     if (
-                        pos[0] > 200 and pos[0] < 200 + button_width and
-                        pos[1] > 655 and pos[1] < 655 + button_height
+                        pos[0] > 200
+                        and pos[0] < 200 + button_width
+                        and pos[1] > 655
+                        and pos[1] < 655 + button_height
                     ):
                         print(f"Run algorithm {self.algorithm_selected}")
-                        
-                        if (self.algorithm_selected == "ACO"):
-                            print (self.algorithm_selected)
+
+                        if self.algorithm_selected == "ACO":
+                            print(self.algorithm_selected)
                             solution, nodes_expand, time = ACO_solve(self.random_sudoku)
                             show_sudoku(solution)
                             self.render_statistics_results(nodes_expand, time)
-                        elif (self.algorithm_selected == "BFS"):
+                        elif self.algorithm_selected == "BFS":
                             solution, nodes_expand, time = BFS_solve(self.random_sudoku)
                             show_sudoku(solution)
                             self.render_statistics_results(nodes_expand, time)
-                        elif (self.algorithm_selected == "DFS"):
+                        elif self.algorithm_selected == "DFS":
                             solution, nodes_expand, time = DFS_solve(self.random_sudoku)
                             show_sudoku(solution)
                             self.render_statistics_results(nodes_expand, time)
-                        elif (self.algorithm_selected == "UCS"):
+                        elif self.algorithm_selected == "UCS":
                             solution, nodes_expand, time = UCS_solve(self.random_sudoku)
                             show_sudoku(solution)
                             self.render_statistics_results(nodes_expand, time)
-                        elif (self.algorithm_selected == "A*"):
-                            solution, nodes_expand, time = a_star_solve(self.random_sudoku)
+                        elif self.algorithm_selected == "A*":
+                            solution, nodes_expand, time = a_star_solve(
+                                self.random_sudoku
+                            )
                             show_sudoku(solution)
                             self.render_statistics_results(nodes_expand, time)
                     if (
-                        pos[0] > 635 and pos[0] < 635 + 250 and
-                        pos[1] > 580 and pos[1] < 580 + 40
+                        pos[0] > 635
+                        and pos[0] < 635 + 250
+                        and pos[1] > 580
+                        and pos[1] < 580 + 40
                     ):
                         if self.dropdown_expanded:
                             self.dropdown_expanded = False
                         else:
                             self.dropdown_expanded = True
-                        
+
                     # Event click option
                     if (
-                        pos[0] > 635 and pos[0] < 635 + 250 and
-                        pos[1] > 580 - 1 * 40 and pos[1] < 580 + 40 - 1 * 40 and
-                        self.dropdown_expanded == True
+                        pos[0] > 635
+                        and pos[0] < 635 + 250
+                        and pos[1] > 580 - 1 * 40
+                        and pos[1] < 580 + 40 - 1 * 40
+                        and self.dropdown_expanded == True
                     ):
                         self.algorithm_selected = "A*"
                         self.dropdown_expanded = False
                         print(self.algorithm_selected)
-                        
+
                     if (
-                        pos[0] > 635 and pos[0] < 635 + 250 and
-                        pos[1] > 580 - 2 * 40 and pos[1] < 580 + 40 - 2 * 40 and
-                        self.dropdown_expanded == True
+                        pos[0] > 635
+                        and pos[0] < 635 + 250
+                        and pos[1] > 580 - 2 * 40
+                        and pos[1] < 580 + 40 - 2 * 40
+                        and self.dropdown_expanded == True
                     ):
                         self.algorithm_selected = "UCS"
                         self.dropdown_expanded = False
                         print(self.algorithm_selected)
-                        
+
                     if (
-                        pos[0] > 635 and pos[0] < 635 + 250 and
-                        pos[1] > 580 - 3 * 40 and pos[1] < 580 + 40 - 3 * 40 and
-                        self.dropdown_expanded == True
+                        pos[0] > 635
+                        and pos[0] < 635 + 250
+                        and pos[1] > 580 - 3 * 40
+                        and pos[1] < 580 + 40 - 3 * 40
+                        and self.dropdown_expanded == True
                     ):
                         self.algorithm_selected = "DFS"
                         self.dropdown_expanded = False
                         print(self.algorithm_selected)
-                        
+
                     if (
-                        pos[0] > 635 and pos[0] < 635 + 250 and
-                        pos[1] > 580 - 4 * 40 and pos[1] < 580 + 40 - 4 * 40 and
-                        self.dropdown_expanded == True
+                        pos[0] > 635
+                        and pos[0] < 635 + 250
+                        and pos[1] > 580 - 4 * 40
+                        and pos[1] < 580 + 40 - 4 * 40
+                        and self.dropdown_expanded == True
                     ):
                         self.algorithm_selected = "BFS"
                         self.dropdown_expanded = False
                         print(self.algorithm_selected)
-                        
+
                     if (
-                        pos[0] > 635 and pos[0] < 635 + 250 and
-                        pos[1] > 580 - 5 * 40 and pos[1] < 580 + 40 - 5 * 40 and
-                        self.dropdown_expanded == True
+                        pos[0] > 635
+                        and pos[0] < 635 + 250
+                        and pos[1] > 580 - 5 * 40
+                        and pos[1] < 580 + 40 - 5 * 40
+                        and self.dropdown_expanded == True
                     ):
                         self.algorithm_selected = "ACO"
                         self.dropdown_expanded = False
@@ -540,8 +629,12 @@ class Game(Board):
                         self.menu_state = True
                 if self.start_state:
                     print(pos)
-                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 260) and (
-                        pos[1] > self.h // 2 + 85 - 200 and pos[1] < self.h // 2 + 85 - 200 + 60):
+                    if (
+                        pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 260
+                    ) and (
+                        pos[1] > self.h // 2 + 85 - 200
+                        and pos[1] < self.h // 2 + 85 - 200 + 60
+                    ):
                         self.random_sudoku = generate_random_sudoku("easy")
                         print("easy")
                         # solution, nodes_expand, time = ACO_solve(random_sudoku)
@@ -552,8 +645,12 @@ class Game(Board):
                         self.start_state = False
                         self.counting = True
                         self.playing = True
-                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 260) and (
-                        pos[1] > self.h // 2 + 85 * 2 - 200 and pos[1] < self.h // 2 + 2 * 85 - 200 + 60):
+                    if (
+                        pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 260
+                    ) and (
+                        pos[1] > self.h // 2 + 85 * 2 - 200
+                        and pos[1] < self.h // 2 + 2 * 85 - 200 + 60
+                    ):
                         self.random_sudoku = generate_random_sudoku("medium")
                         print("medium")
                         # t, _, _ = ACO_solve(random_sudoku)
@@ -564,8 +661,12 @@ class Game(Board):
                         self.start_state = False
                         self.counting = True
                         self.playing = True
-                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 235) and (
-                        pos[1] > self.h // 2 + 85 * 3 - 200 and pos[1] < self.h // 2 + 3 * 85 - 200 + 60):
+                    if (
+                        pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 235
+                    ) and (
+                        pos[1] > self.h // 2 + 85 * 3 - 200
+                        and pos[1] < self.h // 2 + 3 * 85 - 200 + 60
+                    ):
                         self.random_sudoku = generate_random_sudoku("hard")
                         print("hard")
                         # t, _, _ = ACO_solve(random_sudoku)
@@ -576,8 +677,12 @@ class Game(Board):
                         self.start_state = False
                         self.counting = True
                         self.playing = True
-                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 310) and (
-                        pos[1] > self.h // 2 + 85 * 4 - 200 and pos[1] < self.h // 2 + 4 * 85 - 200 + 60):
+                    if (
+                        pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 310
+                    ) and (
+                        pos[1] > self.h // 2 + 85 * 4 - 200
+                        and pos[1] < self.h // 2 + 4 * 85 - 200 + 60
+                    ):
                         self.random_sudoku = generate_random_sudoku("expert")
                         print("expert")
                         # t, _, _ = ACO_solve(random_sudoku)
@@ -588,8 +693,12 @@ class Game(Board):
                         self.start_state = False
                         self.counting = True
                         self.playing = True
-                    if (pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 310) and (
-                        pos[1] > self.h // 2 + 85 * 5 - 200 and pos[1] < self.h // 2 + 5 * 85 - 200 + 60):
+                    if (
+                        pos[0] > self.w // 2 - 70 and pos[0] < self.w // 2 - 70 + 310
+                    ) and (
+                        pos[1] > self.h // 2 + 85 * 5 - 200
+                        and pos[1] < self.h // 2 + 5 * 85 - 200 + 60
+                    ):
                         self.start_state = False
                         self.menu_state = True
 
@@ -604,10 +713,9 @@ class Game(Board):
                 start = time.time()
                 # Playing state loop
                 while self.playing:
-        
                     if self.counting:
                         play_time = round(time.time() - start)
-                    
+
                     self.main_event_handler()
                     if self.board.clicked and self.key != None:
                         self.board.temp(self.key)
@@ -628,7 +736,7 @@ class Game(Board):
             # Difficulty menu loop
             elif self.difficulty_state:
                 while self.difficulty_state:
-                    self.render_difficulty()
+                    self.render_life_chances()
                     self.main_event_handler()
 
                     pygame.display.update()
